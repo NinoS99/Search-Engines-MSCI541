@@ -1,0 +1,38 @@
+using System;
+using System.IO ;
+using System.Text.RegularExpressions ;
+
+// Author: Mark D. Smucker
+
+public class QRels
+{
+    /// <summary>
+    /// the results of reading in the file
+    /// </summary>
+    public RelevanceJudgments judgments = new RelevanceJudgments() ;
+
+    /// <summary>
+    /// Yo, this will throw IO exceptions if something IO bad happens
+    /// </summary>
+    /// <param name="fullpath"></param>
+    public QRels( string fullpath )
+    {
+        StreamReader sr = new StreamReader( fullpath ) ;
+        string line ;
+        while ( (line = sr.ReadLine()) != null )
+        {
+            char [] whitespace = { '\t', ' ' };
+            string [] fields = line.Split( whitespace ) ;
+            // should be "query-num unknown doc-id rel-judgment"
+            if ( fields.Length != 4 )
+            {
+                throw new Exception( "input should have 4 columns" ) ;
+            }
+            string queryID = fields[0] ;
+            string docID = fields[2] ;
+            int relevant = int.Parse( fields[3] ) ;
+            judgments.AddJudgement( queryID, docID, relevant ) ;
+        }
+        sr.Close() ;
+    }
+}

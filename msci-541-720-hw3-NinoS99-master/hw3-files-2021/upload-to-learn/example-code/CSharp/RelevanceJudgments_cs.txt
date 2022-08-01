@@ -1,0 +1,152 @@
+using System;
+using System.Collections ;
+using System.Diagnostics ;
+
+// Author: Mark D. Smucker
+
+public class RelevanceJudgments
+{
+    /// <summary>
+    /// Internal class for use by RelevanceJudgments to hold the judgements
+    /// </summary>
+    private class Tuple
+    {
+        public Tuple(string queryID, string docID, int relevant)
+        {
+            this._queryID = queryID ;
+            this._docID = docID ;
+            this._relevant = relevant ;
+        }
+        private string _queryID ;
+        private string _docID ;
+        private int _relevant ;
+
+        public string queryID 
+        {
+            get { return _queryID ; }
+        }
+        public string docID 
+        {
+            get { return _docID ; } 
+        }
+        public int relevant 
+        {
+            get { return _relevant ; }
+        }
+
+        public static string GenerateKey( string queryID, string docID )
+        {
+            return queryID + "-" + docID ;
+        }
+
+        public string Key
+        {
+            get
+            {
+                return _queryID + "-" + _docID ;
+            }
+        }
+    }
+
+    private Hashtable tuples ;
+    private Hashtable query2reldocnos ;
+    
+    public RelevanceJudgments()
+    {
+        this.tuples = new Hashtable() ;
+        this.query2reldocnos = new Hashtable() ;
+    }
+    
+    public void AddJudgement( string queryID, string docID, int relevant )
+    {
+        Tuple tuple = new Tuple( queryID, docID, relevant ) ;
+        if ( this.tuples.ContainsKey( tuple.Key ) )
+            throw new Exception( "Cannot have duplicate queryID and docID data points" ) ;
+        this.tuples.Add( tuple.Key, tuple ) ;
+        if ( tuple.relevant != 0 )
+        {
+            // store the reldocnos
+            ArrayList tmpRelDocnos = null;
+            if ( query2reldocnos.ContainsKey( queryID ) )
+            {
+                tmpRelDocnos = (ArrayList)query2reldocnos[queryID];
+            }
+            else
+            {
+                tmpRelDocnos = new ArrayList();
+                query2reldocnos.Add( queryID, tmpRelDocnos );
+            }
+            if ( !tmpRelDocnos.Contains( docID ) )
+                tmpRelDocnos.Add( docID );
+        }
+    }
+
+    /// <summary>
+    /// Is the document relevant to the query?
+    /// </summary>
+    /// <param name="queryID"></param>
+    /// <param name="docID"></param>
+    /// <returns></returns>
+    public bool IsRelevant( string queryID, string docID )
+    {
+        return GetJudgment( queryID, docID, true ) != 0 ;
+    }
+
+    public int GetJudgment( string queryID, string docID ) 
+    {
+        return GetJudgment( queryID, docID, false ) ;
+    }
+
+    public int GetJudgment( string queryID, string docID, bool assumeNonRelevant )
+    {
+        if ( ! this.query2reldocnos.ContainsKey( queryID ) )
+            throw new Exception( "no relevance judgments for queryID = " + queryID ) ;
+
+        string key = Tuple.GenerateKey( queryID, docID ) ;
+        if ( ! tuples.ContainsKey( key ) )
+        {
+            if ( assumeNonRelevant )
+                return 0 ;
+            else
+                throw new Exception( "no relevance judgement for queryID and docID" ) ;
+        }
+        else
+        {
+            Tuple tuple = (Tuple)tuples[ key ] ;
+            return tuple.relevant ;
+        }
+    }
+
+    /// <summary>
+    /// Number of relevant documents in collection for query
+    /// </summary>
+    /// <param name="queryID"></param>
+    /// <returns></returns>
+    public int NumRelevant( string queryID )
+    {
+        if ( this.query2reldocnos.ContainsKey( queryID ) )
+            return ((ArrayList)this.query2reldocnos[queryID]).Count ;
+        else
+            throw new Exception( "no relevance judgments for queryID = " + queryID ) ;
+    }
+
+    /// <summary>
+    /// returns the queryID strings
+    /// </summary>
+    /// <returns></returns>
+    public ICollection QueryIDs
+    {
+        get
+        {
+            return this.query2reldocnos.Keys ;
+        }
+    }
+
+    public ArrayList RelDocnos( string queryID )
+    {
+        if ( this.query2reldocnos.ContainsKey( queryID ) )
+            return (ArrayList)this.query2reldocnos[queryID] ;
+        else
+            throw new Exception( "no relevance judgments for queryID = " + queryID ) ;
+    }
+}

@@ -1,0 +1,52 @@
+using System;
+using System.IO ;
+using System.Text.RegularExpressions ;
+
+// Author: Mark D. Smucker
+
+public class ResultsFile 
+{
+    /// <summary>
+    /// the results
+    /// </summary>
+    public Results results = new Results() ;
+    public string runID ;
+
+    /// <summary>
+    /// Yo, this will throw IO exceptions if something IO bad happens
+    /// </summary>
+    /// <param name="path"></param>
+    public ResultsFile( string fullpath )
+    {
+        char [] whitespace = { '\t', ' ' };
+        StreamReader sr = new StreamReader( fullpath ) ;
+        bool firstLine = true ;
+        string line ;
+        while ( (line = sr.ReadLine()) != null )
+        {
+            string [] fields = line.Split( whitespace ) ;
+            // should be "queryID Q0 doc-id rank score runID"
+            if ( fields.Length != 6 )
+            {
+                throw new Exception( "input should have 6 columns" ) ;
+            }
+            
+            string queryID = fields[0] ;
+            string docID = fields[2] ;
+            int rank = int.Parse( fields[3] ) ;
+            double score = double.Parse( fields[4] ) ;
+            results.AddResult( queryID, docID, score, rank ) ;
+            if ( firstLine )
+            {
+                this.runID = fields[5] ;
+                firstLine = false ; 
+            }
+            else if ( this.runID != fields[5] )
+            {
+                throw new Exception("mismatching runIDs in file" ) ;
+            }
+        }
+        sr.Close() ;
+    }
+}
+

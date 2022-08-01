@@ -1,0 +1,15 @@
+﻿Effectiveness Measure,Best Run Score,Second Best Run Score,Relative Percent Improvement,"Student's t-test; two-side, paired, p-value",
+Mean AP,0.250,0.224,11.607%,0.171,
+Mean P@10,0.282,0.260,8.462%,0.243,
+Mean NCDG@10,0.737,0.736,0.136%,0.0003*,
+Mean NDCG@1000,0.584,0.573,1.920%,0.134,
+Mean TBG,7.724,7.398,4.407%,0.223,
+,,,,,
+,,,,,
+student1 vs booleanAND,,,,,
+Effectiveness Measure,studen1 Run Score,booleanAND Run Score,Relative Percent Improvement,"Student's t-test; two-side, paired, p-value",
+Mean AP,0.264,0.105,151.825%,0.000000,*
+Mean P@10,0.293,0.155,89.118%,0.000553,*
+Mean NCDG@10,0.580,0.388,49.487%,0.000328,*
+Mean NDCG@1000,0.597,0.450,32.657%,0.000206,*
+Mean TBG,7.676,2.294,234.668%,0.000059,*
